@@ -1,6 +1,5 @@
-package com.kensbunker.vertx.assets;
+package com.kensbunker.vertx.broker.assets;
 
-import com.kensbunker.vertx.broker.assets.Asset;
 import io.vertx.core.json.JsonArray;
 import io.vertx.ext.web.Router;
 import org.slf4j.Logger;

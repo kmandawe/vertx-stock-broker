@@ -1,11 +1,11 @@
 package com.kensbunker.vertx.broker;
 
-import com.kensbunker.vertx.assets.AssetsRestApi;
+import com.kensbunker.vertx.broker.assets.AssetsRestApi;
+import com.kensbunker.vertx.broker.quotes.QuotesRestApi;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -35,13 +35,15 @@ public class MainVerticle extends AbstractVerticle {
   public void start(Promise<Void> startPromise) throws Exception {
     final Router restApi = Router.router(vertx);
     AssetsRestApi.attach(restApi);
+    QuotesRestApi.attach(restApi);
+
     restApi.route().failureHandler(handleFailure());
     vertx
         .createHttpServer()
         .requestHandler(restApi)
         .exceptionHandler(error -> LOG.error("HTTP Server error: ", error))
         .listen(
-          PORT,
+            PORT,
             http -> {
               if (http.succeeded()) {
                 startPromise.complete();
