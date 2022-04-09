@@ -36,7 +36,7 @@ public class TestWatchListRestApi {
     var client = WebClient.create(vertx, new WebClientOptions().setDefaultPort(MainVerticle.PORT));
     var accountId = UUID.randomUUID();
     client
-        .put("/account/watchlist/" + accountId.toString())
+        .put("/account/watchlist/" + accountId)
         .sendJsonObject(body())
         .onComplete(
             testContext.succeeding(
@@ -62,6 +62,42 @@ public class TestWatchListRestApi {
                                 json.encode());
                             assertEquals(200, response.statusCode());
                             testContext.completeNow();
+                          }));
+              return Future.succeededFuture();
+            });
+  }
+
+  @Test
+  void add_and_deletes_watchlist_for_account(Vertx vertx, VertxTestContext context) {
+    var client = WebClient.create(vertx, new WebClientOptions().setDefaultPort(MainVerticle.PORT));
+    var accountId = UUID.randomUUID();
+    client
+        .put("/account/watchlist/" + accountId)
+        .sendJsonObject(body())
+        .onComplete(
+            context.succeeding(
+                response -> {
+                  var json = response.bodyAsJsonObject();
+                  LOG.info("Response PUT: {}", json);
+                  assertEquals(
+                      "{\"assets\":[{\"name\":\"AMZN\"},{\"name\":\"TSLA\"}]}", json.encode());
+                  assertEquals(200, response.statusCode());
+                }))
+        .compose(
+            next -> {
+              client
+                  .delete("/account/watchlist/" + accountId)
+                  .send()
+                  .onComplete(
+                      context.succeeding(
+                          response -> {
+                            var json = response.bodyAsJsonObject();
+                            LOG.info("Response DELETE: {}", json);
+                            assertEquals(
+                                "{\"assets\":[{\"name\":\"AMZN\"},{\"name\":\"TSLA\"}]}",
+                                json.encode());
+                            assertEquals(200, response.statusCode());
+                            context.completeNow();
                           }));
               return Future.succeededFuture();
             });

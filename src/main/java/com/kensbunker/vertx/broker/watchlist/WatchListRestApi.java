@@ -3,6 +3,7 @@ package com.kensbunker.vertx.broker.watchlist;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,8 +25,7 @@ public class WatchListRestApi {
         .get(path)
         .handler(
             context -> {
-              var accountId = context.pathParam("accountId");
-              LOG.debug("{} for account {}", context.normalizedPath(), accountId);
+              String accountId = getAccountId(context);
               var maybeWatchList =
                   Optional.ofNullable(watchListPerAccount.get(UUID.fromString(accountId)));
               if (maybeWatchList.isEmpty()) {
@@ -41,16 +41,32 @@ public class WatchListRestApi {
               }
               context.response().end(maybeWatchList.get().toJsonObject().toBuffer());
             });
-    parent.put(path).handler(context -> {
-      var accountId = context.pathParam("accountId");
-      LOG.debug("{} for account {}", context.normalizedPath(), accountId);
+    parent
+        .put(path)
+        .handler(
+            context -> {
+              String accountId = getAccountId(context);
 
-      var json = context.getBodyAsJson();
-      var watchList = json.mapTo(WatchList.class);
-      watchListPerAccount.put(UUID.fromString(accountId), watchList);
-      context.response().end(json.toBuffer());
-    });
+              var json = context.getBodyAsJson();
+              var watchList = json.mapTo(WatchList.class);
+              watchListPerAccount.put(UUID.fromString(accountId), watchList);
+              context.response().end(json.toBuffer());
+            });
 
-    parent.delete(path).handler(context -> {});
+    parent
+        .delete(path)
+        .handler(
+            context -> {
+              String accountId = getAccountId(context);
+              final WatchList deleted = watchListPerAccount.remove(UUID.fromString(accountId));
+              LOG.info("Deleted: {}, Remaining: {}", deleted, watchListPerAccount.values());
+              context.response().end(deleted.toJsonObject().toBuffer());
+            });
+  }
+
+  private static String getAccountId(RoutingContext context) {
+    var accountId = context.pathParam("accountId");
+    LOG.debug("{} for account {}", context.normalizedPath(), accountId);
+    return accountId;
   }
 }
