@@ -2,6 +2,7 @@ package com.kensbunker.vertx.broker;
 
 import com.kensbunker.vertx.broker.assets.AssetsRestApi;
 import com.kensbunker.vertx.broker.quotes.QuotesRestApi;
+import com.kensbunker.vertx.broker.watchlist.WatchListRestApi;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
@@ -36,6 +37,7 @@ public class MainVerticle extends AbstractVerticle {
     final Router restApi = Router.router(vertx);
     AssetsRestApi.attach(restApi);
     QuotesRestApi.attach(restApi);
+    WatchListRestApi.attach(restApi);
 
     restApi.route().failureHandler(handleFailure());
     vertx
