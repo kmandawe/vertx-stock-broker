@@ -3,7 +3,6 @@ package com.kensbunker.vertx.broker.quotes;
 import com.kensbunker.vertx.broker.assets.Asset;
 import com.kensbunker.vertx.broker.assets.AssetsRestApi;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import org.slf4j.Logger;

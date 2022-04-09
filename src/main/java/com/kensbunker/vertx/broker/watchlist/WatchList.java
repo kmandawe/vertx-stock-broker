@@ -2,11 +2,15 @@ package com.kensbunker.vertx.broker.watchlist;
 
 import com.kensbunker.vertx.broker.assets.Asset;
 import io.vertx.core.json.JsonObject;
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-@Value
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class WatchList {
 
   List<Asset> assets;
