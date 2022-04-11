@@ -6,20 +6,27 @@ import lombok.Value;
 @Value
 @Builder
 public class DbConfig {
-  String host = "localhost";
-  int port = 5432;
-  String database = "vertx-stock-broker";
-  String user = "postgres";
-  String password = "secret";
+  String host;
+  int port;
+  String database;
+  String user;
+  String password;
 
   @Override
   public String toString() {
-    return "DbConfig{" +
-      "host='" + host + '\'' +
-      ", port=" + port +
-      ", database='" + database + '\'' +
-      ", user='" + user + '\'' +
-      ", password='****'" +
-      '}';
+    return "DbConfig{"
+        + "host='"
+        + host
+        + '\''
+        + ", port="
+        + port
+        + ", database='"
+        + database
+        + '\''
+        + ", user='"
+        + user
+        + '\''
+        + ", password='****'"
+        + '}';
   }
 }

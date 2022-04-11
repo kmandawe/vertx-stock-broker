@@ -27,7 +27,17 @@ public class BrokerConfig {
     return BrokerConfig.builder()
         .serverPort(serverPort)
         .version(version)
-        .dbConfig(new DbConfig())
+        .dbConfig(paseDbConfig(config))
+        .build();
+  }
+
+  private static DbConfig paseDbConfig(final JsonObject config) {
+    return DbConfig.builder()
+        .host(config.getString(ConfigLoader.DB_HOST))
+        .port(config.getInteger(ConfigLoader.DB_PORT))
+        .database(config.getString(ConfigLoader.DB_DATABASE))
+        .user(config.getString(ConfigLoader.DB_USER))
+        .password(config.getString(ConfigLoader.DB_PASSWORD))
         .build();
   }
 }

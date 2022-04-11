@@ -18,6 +18,7 @@ public class FlyWayMigration {
   private static final Logger LOG = LoggerFactory.getLogger(FlyWayMigration.class);
 
   public static Future<Void> migrate(final Vertx vertx, final DbConfig dbConfig) {
+    LOG.debug("DB Config {}", dbConfig);
     return vertx
         .<Void>executeBlocking(
             promise -> {
