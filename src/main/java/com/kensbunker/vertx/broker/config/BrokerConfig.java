@@ -13,6 +13,7 @@ import java.util.Objects;
 public class BrokerConfig {
   int serverPort;
   String version;
+  DbConfig dbConfig;
 
   public static BrokerConfig from(final JsonObject config) {
     final Integer serverPort = config.getInteger(ConfigLoader.SERVER_PORT);
@@ -23,6 +24,10 @@ public class BrokerConfig {
     if (Objects.isNull(version)) {
       throw new RuntimeException("version is not configured in config file!");
     }
-    return BrokerConfig.builder().serverPort(serverPort).version(version).build();
+    return BrokerConfig.builder()
+        .serverPort(serverPort)
+        .version(version)
+        .dbConfig(new DbConfig())
+        .build();
   }
 }

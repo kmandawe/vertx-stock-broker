@@ -1,6 +1,7 @@
 package com.kensbunker.vertx.broker;
 
 import com.kensbunker.vertx.broker.config.ConfigLoader;
+import com.kensbunker.vertx.broker.db.migration.FlyWayMigration;
 import io.vertx.core.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,15 @@ public class MainVerticle extends AbstractVerticle {
         .onFailure(startPromise::fail)
         .onSuccess(
             id -> LOG.info("Deployed {} with {}", VersionInfoVerticle.class.getSimpleName(), id))
+        .compose(next -> migrateDatabase())
+        .onFailure(startPromise::fail)
+        .onSuccess(id -> LOG.info("Migrated db schema to latest version!"))
         .compose(next -> deployRestApiVerticle(startPromise));
+  }
+
+  private Future<Void> migrateDatabase() {
+    return ConfigLoader.load(Vertx.vertx())
+        .compose(config -> FlyWayMigration.migrate(vertx, config.getDbConfig()));
   }
 
   private Future<String> deployRestApiVerticle(Promise<Void> startPromise) {
