@@ -1,6 +1,8 @@
 package com.kensbunker.vertx.broker;
 
 import com.kensbunker.vertx.broker.assets.AssetsRestApi;
+import com.kensbunker.vertx.broker.config.BrokerConfig;
+import com.kensbunker.vertx.broker.config.ConfigLoader;
 import com.kensbunker.vertx.broker.quotes.QuotesRestApi;
 import com.kensbunker.vertx.broker.watchlist.WatchListRestApi;
 import io.vertx.core.AbstractVerticle;
@@ -18,10 +20,17 @@ public class RestApiVerticle extends AbstractVerticle {
 
   @Override
   public void start(Promise<Void> startPromise) throws Exception {
-    startHttpServerAndAttachRoutes(startPromise);
+    ConfigLoader.load(vertx)
+        .onFailure(startPromise::fail)
+        .onSuccess(
+            configuration -> {
+              LOG.info("Retrieved configuration {}", configuration);
+              startHttpServerAndAttachRoutes(startPromise, configuration);
+            });
   }
 
-  private void startHttpServerAndAttachRoutes(Promise<Void> startPromise) {
+  private void startHttpServerAndAttachRoutes(
+      final Promise<Void> startPromise, final BrokerConfig configuration) {
     final Router restApi = Router.router(vertx);
     restApi.route().handler(BodyHandler.create()).failureHandler(handleFailure());
 
@@ -34,11 +43,11 @@ public class RestApiVerticle extends AbstractVerticle {
         .requestHandler(restApi)
         .exceptionHandler(error -> LOG.error("HTTP Server error: ", error))
         .listen(
-            MainVerticle.PORT,
+            configuration.getServerPort(),
             http -> {
               if (http.succeeded()) {
                 startPromise.complete();
-                LOG.info("HTTP server started on port 8888");
+                LOG.info("HTTP server started on port {}", configuration.getServerPort());
               } else {
                 startPromise.fail(http.cause());
               }
