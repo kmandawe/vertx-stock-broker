@@ -19,6 +19,7 @@ public class ConfigLoader {
 
   public static final String SERVER_PORT = "SERVER_PORT";
   static final List<String> EXPOSED_ENVIRONMENT_VARIABLES = Arrays.asList(SERVER_PORT);
+  public static final String CONFIG_FILE = "application.yml";
 
   public static Future<BrokerConfig> load(Vertx vertx) {
 
@@ -34,9 +35,19 @@ public class ConfigLoader {
     var propertyStore =
         new ConfigStoreOptions().setType("sys").setConfig(new JsonObject().put("cache", false));
 
+    var yamlStore =
+        new ConfigStoreOptions()
+            .setType("file")
+            .setFormat("yaml")
+            .setConfig(new JsonObject().put("path", CONFIG_FILE));
+
     var retriever =
         ConfigRetriever.create(
-            vertx, new ConfigRetrieverOptions().addStore(propertyStore).addStore(envStore));
+            vertx,
+            new ConfigRetrieverOptions()
+                .addStore(yamlStore)
+                .addStore(propertyStore)
+                .addStore(envStore));
     return retriever.getConfig().map(BrokerConfig::from);
   }
 }
