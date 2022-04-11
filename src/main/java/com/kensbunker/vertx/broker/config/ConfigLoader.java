@@ -31,7 +31,12 @@ public class ConfigLoader {
             .setType("env")
             .setConfig(new JsonObject().put("keys", exposedKeys));
 
-    var retriever = ConfigRetriever.create(vertx, new ConfigRetrieverOptions().addStore(envStore));
+    var propertyStore =
+        new ConfigStoreOptions().setType("sys").setConfig(new JsonObject().put("cache", false));
+
+    var retriever =
+        ConfigRetriever.create(
+            vertx, new ConfigRetrieverOptions().addStore(propertyStore).addStore(envStore));
     return retriever.getConfig().map(BrokerConfig::from);
   }
 }

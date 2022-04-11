@@ -1,5 +1,6 @@
 package com.kensbunker.vertx.broker;
 
+import com.kensbunker.vertx.broker.config.ConfigLoader;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Promise;
@@ -13,6 +14,7 @@ public class MainVerticle extends AbstractVerticle {
   public static final int PORT = 8888;
 
   public static void main(String[] args) {
+    System.setProperty(ConfigLoader.SERVER_PORT, "9000");
     var vertx = Vertx.vertx();
     vertx.exceptionHandler(error -> LOG.error("Unhandled: {}", error));
     vertx
