@@ -1,5 +1,6 @@
 package com.kensbunker.vertx.broker.quotes;
 
+import com.kensbunker.vertx.broker.db.DbResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
@@ -26,14 +27,7 @@ public class GetQuoteHandler implements Handler<RoutingContext> {
 
     var maybeQuote = Optional.ofNullable(cachedQuotes.get(assetParam));
     if (maybeQuote.isEmpty()) {
-      context
-          .response()
-          .setStatusCode(HttpResponseStatus.NOT_FOUND.code())
-          .end(
-              new JsonObject()
-                  .put("message", "quote for asset " + assetParam + " not available!")
-                  .put("path", context.normalizedPath())
-                  .toBuffer());
+      DbResponse.notFoundResponse(context, "quote for asset " + assetParam + " not available!");
       return;
     }
     final JsonObject response = maybeQuote.get().toJsonObject();
