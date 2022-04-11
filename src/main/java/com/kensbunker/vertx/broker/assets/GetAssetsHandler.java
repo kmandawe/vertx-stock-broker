@@ -19,7 +19,7 @@ public class GetAssetsHandler implements Handler<RoutingContext> {
     final JsonArray response = new JsonArray();
     AssetsRestApi.ASSETS.stream().map(Asset::new).forEach(response::add);
     LOG.info("Path {} responds with {}", context.normalizedPath(), response.encode());
-    artificialSleep(context);
+//    artificialSleep(context);
     context
         .response()
         .putHeader(HttpHeaders.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)

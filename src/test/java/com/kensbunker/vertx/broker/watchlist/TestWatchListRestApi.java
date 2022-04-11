@@ -1,5 +1,6 @@
 package com.kensbunker.vertx.broker.watchlist;
 
+import com.kensbunker.vertx.broker.AbstractRestApiTest;
 import com.kensbunker.vertx.broker.MainVerticle;
 import com.kensbunker.vertx.broker.assets.Asset;
 import io.vertx.core.Future;
@@ -21,19 +22,13 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(VertxExtension.class)
-public class TestWatchListRestApi {
+public class TestWatchListRestApi extends AbstractRestApiTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(TestWatchListRestApi.class);
 
-  @BeforeEach
-  void deploy_verticle(Vertx vertx, VertxTestContext testContext) {
-    vertx.deployVerticle(
-        new MainVerticle(), testContext.succeeding(id -> testContext.completeNow()));
-  }
-
   @Test
   void adds_and_returns_watchlist_for_account(Vertx vertx, VertxTestContext testContext) {
-    var client = WebClient.create(vertx, new WebClientOptions().setDefaultPort(MainVerticle.PORT));
+    var client = webClient(vertx);
     var accountId = UUID.randomUUID();
     client
         .put("/account/watchlist/" + accountId)
@@ -69,7 +64,7 @@ public class TestWatchListRestApi {
 
   @Test
   void add_and_deletes_watchlist_for_account(Vertx vertx, VertxTestContext context) {
-    var client = WebClient.create(vertx, new WebClientOptions().setDefaultPort(MainVerticle.PORT));
+    var client = webClient(vertx);
     var accountId = UUID.randomUUID();
     client
         .put("/account/watchlist/" + accountId)
@@ -105,5 +100,9 @@ public class TestWatchListRestApi {
 
   private JsonObject body() {
     return new WatchList(Arrays.asList(new Asset("AMZN"), new Asset("TSLA"))).toJsonObject();
+  }
+
+  private WebClient webClient(Vertx vertx) {
+    return WebClient.create(vertx, new WebClientOptions().setDefaultPort(TEST_SERVER_PORT));
   }
 }

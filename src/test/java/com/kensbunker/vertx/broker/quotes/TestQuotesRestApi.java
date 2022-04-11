@@ -1,5 +1,6 @@
 package com.kensbunker.vertx.broker.quotes;
 
+import com.kensbunker.vertx.broker.AbstractRestApiTest;
 import com.kensbunker.vertx.broker.MainVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.client.WebClient;
@@ -15,19 +16,13 @@ import org.slf4j.LoggerFactory;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(VertxExtension.class)
-public class TestQuotesRestApi {
+public class TestQuotesRestApi extends AbstractRestApiTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(TestQuotesRestApi.class);
 
-  @BeforeEach
-  void deploy_verticle(Vertx vertx, VertxTestContext testContext) {
-    vertx.deployVerticle(
-        new MainVerticle(), testContext.succeeding(id -> testContext.completeNow()));
-  }
-
   @Test
   void returns_quote_for_asset(Vertx vertx, VertxTestContext testContext) throws Throwable {
-    var client = WebClient.create(vertx, new WebClientOptions().setDefaultPort(MainVerticle.PORT));
+    var client = webClient(vertx);
     client
         .get("/quotes/AMZN")
         .send()
@@ -45,7 +40,7 @@ public class TestQuotesRestApi {
   @Test
   void returns_not_found_for_unknown_asset(Vertx vertx, VertxTestContext testContext)
       throws Throwable {
-    var client = WebClient.create(vertx, new WebClientOptions().setDefaultPort(MainVerticle.PORT));
+    var client = webClient(vertx);
     client
         .get("/quotes/UNKNOWN")
         .send()
@@ -60,5 +55,9 @@ public class TestQuotesRestApi {
                       json.encode());
                   testContext.completeNow();
                 }));
+  }
+
+  private WebClient webClient(Vertx vertx) {
+    return WebClient.create(vertx, new WebClientOptions().setDefaultPort(TEST_SERVER_PORT));
   }
 }
