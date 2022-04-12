@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class PutWatchListDatabaseHandler implements Handler<RoutingContext> {
@@ -27,26 +28,25 @@ public class PutWatchListDatabaseHandler implements Handler<RoutingContext> {
     var json = context.getBodyAsJson();
     var watchList = json.mapTo(WatchList.class);
 
-    watchList
-        .getAssets()
-        .forEach(
-            asset -> {
-              Map<String, Object> parameters = new HashMap<>();
-              parameters.put("account_id", accountId);
-              parameters.put("asset", asset.getName());
-              SqlTemplate.forUpdate(
-                      db, "INSERT INTO broker.watchlist VALUES (#{account_id},#{asset})")
-                  .execute(parameters)
-                  .onFailure(DbResponse.errorHandler(context, "Failed to insert into watchlist"))
-                  .onSuccess(
-                      result -> {
-                        if (!context.response().ended()) {
-                          context
-                              .response()
-                              .setStatusCode(HttpResponseStatus.NO_CONTENT.code())
-                              .end();
-                        }
-                      });
+    var parameterBatch =
+        watchList.getAssets().stream()
+            .map(
+                asset -> {
+                  Map<String, Object> parameters = new HashMap<>();
+                  parameters.put("account_id", accountId);
+                  parameters.put("asset", asset.getName());
+                  return parameters;
+                })
+            .collect(Collectors.toList());
+
+    // Only adding is possible -> Entries for watch list are never removed
+    SqlTemplate.forUpdate(db, "INSERT INTO broker.watchlist VALUES (#{account_id},#{asset})" +
+        " ON CONFLICT (account_id, asset) DO NOTHING")
+        .executeBatch(parameterBatch)
+        .onFailure(DbResponse.errorHandler(context, "Failed to insert into watchlist"))
+        .onSuccess(
+            result -> {
+              context.response().setStatusCode(HttpResponseStatus.NO_CONTENT.code()).end();
             });
   }
 }
