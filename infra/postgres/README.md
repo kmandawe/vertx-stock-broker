@@ -21,7 +21,7 @@ docker-compose -f ./infra/postgres.yml up
 ## Docker Swarm
 Execute from root directory:
 ```
-docker stack deploy -c ./infra/postgres.yml postgres
+docker stack deploy -c ./infra/postgres/postgres.yml postgres
 ```
 
 Contains a volume for permanent storage of data. On system restart the data is available again.

@@ -3,6 +3,7 @@ package com.kensbunker.vertx.broker;
 import com.kensbunker.vertx.broker.assets.AssetsRestApi;
 import com.kensbunker.vertx.broker.config.BrokerConfig;
 import com.kensbunker.vertx.broker.config.ConfigLoader;
+import com.kensbunker.vertx.broker.db.DBPools;
 import com.kensbunker.vertx.broker.quotes.QuotesRestApi;
 import com.kensbunker.vertx.broker.watchlist.WatchListRestApi;
 import io.vertx.core.AbstractVerticle;
@@ -36,7 +37,8 @@ public class RestApiVerticle extends AbstractVerticle {
   private void startHttpServerAndAttachRoutes(
       final Promise<Void> startPromise, final BrokerConfig configuration) {
     // One pool for each Rest API Verticle
-    final Pool db = createDbPool(configuration);
+//    final Pool db = DBPools.createPgPool(configuration, vertx);
+    final Pool db = DBPools.createMySQLPool(configuration, vertx);
 
     final Router restApi = Router.router(vertx);
     restApi.route().handler(BodyHandler.create()).failureHandler(handleFailure());
@@ -59,20 +61,6 @@ public class RestApiVerticle extends AbstractVerticle {
                 startPromise.fail(http.cause());
               }
             });
-  }
-
-  private PgPool createDbPool(final BrokerConfig configuration) {
-    final var connectionOptions =
-        new PgConnectOptions()
-            .setHost(configuration.getDbConfig().getHost())
-            .setPort(configuration.getDbConfig().getPort())
-            .setDatabase(configuration.getDbConfig().getDatabase())
-            .setUser(configuration.getDbConfig().getUser())
-            .setPassword(configuration.getDbConfig().getPassword());
-
-    final var poolOptions = new PoolOptions().setMaxSize(4);
-
-    return PgPool.pool(vertx, connectionOptions, poolOptions);
   }
 
   private Handler<RoutingContext> handleFailure() {
